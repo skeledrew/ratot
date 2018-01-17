@@ -10,15 +10,24 @@ from telegram.ext.filters import Filters
 class AnyBot(Updater):
 
     def __init__(self, token=None, config=None):
-        #pdb.set_trace()
         super().__init__(token or open('{}.token'.format(sys.argv[0])).read().strip())
-        self.load_handlers()
+        self._handlers = {}
+        #self.load_handlers()  # TODO: figure how to make overridable
 
     def load_handlers(self, handlers=None):
 
-       if not handlers:  [self.add_handler(self.make_handler(globals()[h]))for h in globals() if h.startswith('handle_')]
+       if not handlers: handlers = globals()
+       [self.add_handler(self.make_handler(handlers[h]))for h in handlers if h.startswith('handle_')]
 
     def add_handler(self, handler):
+
+        try:
+            if hasattr(handler, 'command') and handler.command[0] in self._handlers: self.dispatcher.remove_handler(self._handlers[handler.command[0]])
+            if handler.filters and str(handler.filters) in self._handlers: self.dispatcher.remove_handler(self._handlers['mh'])
+
+        except:
+            pass
+        self._handlers[handler.command[0] if hasattr(handler, 'command') else str(handler.filters)] = handler
         self.dispatcher.add_handler(handler)
         return
 
@@ -31,6 +40,8 @@ class AnyBot(Updater):
             return MessageHandler(Filters.text, callback)
         return
 
+    def write_log(self, msg):
+        open('{}.log'.format(sys.argv[0]), 'a').write(msg + '\n')
 
 def handle_start(bot=None, update=None):
     if not update: return '/start'
