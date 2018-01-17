@@ -26,7 +26,7 @@ test_requirements = [
 
 setup(
     name='ratot',
-    version='0.0.1',
+    version='0.1.0',
     description="Remote Access Tool Over Telegram",
     long_description=readme + '\n\n' + history,
     author="Andrew Phillips",
