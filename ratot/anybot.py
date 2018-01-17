@@ -51,6 +51,13 @@ def handle_help(bot=None, update=None):
     bot.send_message(chat_id=update.message.chat_id, text=msg)
     return
 
+def handle_text(bot=None, update=None):
+    # process regular text
+    if not update: return '.+'
+    msg = 'Received: {}'.format(update.message.text)
+    bot.send_message(chat_id=update.message.chat_id, text=msg)
+    return
+
 
 if __name__ == '__main__':
     # mainly for testing
