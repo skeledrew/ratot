@@ -1,4 +1,5 @@
 import pdb
+import re
 
 import pexpect  # NB: patch pexpect/__init__.py with `import replwrap`
 import rpyc
@@ -11,16 +12,25 @@ class ShellSessionsService(rpyc.Service):
         self._bash = pexpect.replwrap.bash()
 
     def on_disconnect(self):
-        pass
+        self._bash.run_command('exit')
+        del self._bash
 
     def exposed_repl(self, in_):
         try:
-            out_ = self._bash.run_command(in_)
+            out_ = clean_ansi(self._bash.run_command(in_))
             return out_
 
         except Exception as e:
             print('Something broke: {}'.format(repr(e)))
             return e
+
+
+def clean_ansi(text, remove=''):
+    # remove ANSI control codes
+    ANSI_CLEANER = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]")
+    clean_text = ANSI_CLEANER.sub("", text)
+    return clean_text
+
 
 if __name__ == '__main__':
     from rpyc.utils.server import ThreadedServer
