@@ -23,7 +23,7 @@ class AnyBot(Updater):
 
         try:
             if hasattr(handler, 'command') and handler.command[0] in self._handlers: self.dispatcher.remove_handler(self._handlers[handler.command[0]])
-            if handler.filters and str(handler.filters) in self._handlers: self.dispatcher.remove_handler(self._handlers['mh'])
+            if handler.filters and str(handler.filters) in self._handlers: self.dispatcher.remove_handler(self._handlers[str(handler.filters)])
 
         except:
             pass
@@ -34,8 +34,8 @@ class AnyBot(Updater):
     def make_handler(self, callback):
         pattern = callback()
         if isinstance(pattern, str) and pattern.startswith('/'):
-            return CommandHandler(pattern[1:], callback)
-
+            return CommandHandler(pattern[1:], callback, pass_args=True)
+        if pattern and isinstance(pattern, list): return CommandHandler(pattern, callback, pass_args=True)
         if isinstance(pattern, str):
             return MessageHandler(Filters.text, callback)
         return

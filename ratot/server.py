@@ -25,7 +25,7 @@ class ShellSessionsService(rpyc.Service):
             return e
 
 
-def clean_ansi(text, remove=''):
+def clean_ansi(text):
     # remove ANSI control codes
     ANSI_CLEANER = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]")
     clean_text = ANSI_CLEANER.sub("", text)
