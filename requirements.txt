@@ -1,3 +1,5 @@
 python-telegram-bot
 pexpect
 rpyc
+telethon
+PyYaml
