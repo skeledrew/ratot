@@ -103,6 +103,22 @@ class TGCWrapper():
             if name.lower() in peer.lower(): return peers[peer]
         return None
 
+    def get_sender(self, message):
+        try:
+            return self.get_client().get_entity(message.from_id)
+
+        except Exception as e:
+            msg = 'Failed to get message sender: {}'.format(repr(e))
+            return e
+
+    def get_recvr(self, message):
+        try:
+            return self.get_client().get_entity(message.to_id)
+
+        except Exception as e:
+            msg = 'Failed to get message recipient: {}'.format(repr(e))
+            return e
+
     def start(self, session='', a_id=0, a_hash='', phone=''):
         self.add_client(session, a_id, a_hash)
         self.connect()
@@ -114,20 +130,19 @@ class TGCWrapper():
         return
 
     @staticmethod
-    def load_config(config_file):
+    def load_config(config_file, session=0):
         config = yaml.load(open(config_file))
         clt_cfg = {}
         clt_cfg['a_id'] = config['client']['api_id']
         clt_cfg['a_hash'] = config['client']['api_hash']
-        clt_cfg['session'] = config['sessions'][0]['name']
-        clt_cfg['phone'] = config['sessions'][0]['phone']
+        clt_cfg['session'] = config['sessions'][session]['name']
+        clt_cfg['phone'] = config['sessions'][session]['phone']
         return clt_cfg
 
 
 if __name__ == '__main__':
     # testing
     tgcw = TGCWrapper()
-    #pdb.set_trace()
     config = TGCWrapper.load_config('ratot.yaml')
     tgcw.start(**config)
     embed(globals(), locals())
