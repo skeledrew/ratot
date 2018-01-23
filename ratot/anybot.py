@@ -7,12 +7,28 @@ from telegram.ext import Updater, CommandHandler, MessageHandler
 from telegram.ext.filters import Filters
 
 
+class Callback():
+
+    def __init__(self, wrapper, invoke):
+        self._wrapper = wrapper
+        self._invoke = invoke
+        return
+
+    def __call__(self, *args, **kwargs):
+        if not hasattr(self._wrapper, self._invoke): raise AttributeError('`{}` not found.'.format(self._invoke))
+        return getattr(self._wrapper, self._invoke)(*args, **kwargs)
+
 class AnyBot(Updater):
 
     def __init__(self, token=None, config=None):
         super().__init__(token or open('{}.token'.format(sys.argv[0])).read().strip())
         self._handlers = {}
+        command_cb = Callback(self, 'handle_command')
+        self.dispatcher.add_handler(MessageHandler(Filters.command, command_cb))
+        text_cb = Callback(self, 'handle_text')
+        self.dispatcher.add_handler(MessageHandler(Filters.text, text_cb))
         #self.load_handlers()  # TODO: figure how to make overridable
+        return
 
     def load_handlers(self, handlers=None):
 
@@ -40,34 +56,45 @@ class AnyBot(Updater):
             return MessageHandler(Filters.text, callback)
         return
 
+    def inject_handler(self, handler):
+        pass
     def write_log(self, msg):
         open('{}.log'.format(sys.argv[0]), 'a').write(msg + '\n')
 
-def handle_start(bot=None, update=None):
-    if not update: return '/start'
-    user = update.message.from_user.first_name
-    msg = "Hi {}. I'm a generic bot that needs configuration, I think.".format(user)
-    bot.send_message(chat_id=update.message.chat_id, text=msg)
-    return
+    def handle_command(self, bot, update):
+        msg = update.message.text
+        cmd = '{}_cmd'.format(msg.split()[0][1:])
 
-def handle_config(bot=None, update=None):
-    if not update: return '/config'
-    msg = 'Configuration command not yet implemented.'
-    bot.send_message(chat_id=update.message.chat_id, text=msg)
-    return
+        if not hasattr(self, cmd):
+            bot.send_message(chat_id=update.message.chat_id, text='`{}` is not a valid command.'.format(cmd))
+            return
+        result = getattr(self, cmd)(bot, update)
+        return result
 
-def handle_help(bot=None, update=None):
-    if not update: return '/help'
-    msg = 'Help command not yet implemented.'
-    bot.send_message(chat_id=update.message.chat_id, text=msg)
-    return
+    def handle_text(self, bot, update):
+        # process regular text
+        msg = update.message.text
+        msg = 'Received: {}'.format(update.message.text)
+        bot.send_message(chat_id=update.message.chat_id, text=msg)
+        bot.send_message(chat_id=update.message.chat_id, text='Override the `handle_text` method with your own to properly process text.')
+        return
 
-def handle_text(bot=None, update=None):
-    # process regular text
-    if not update: return '.+'
-    msg = 'Received: {}'.format(update.message.text)
-    bot.send_message(chat_id=update.message.chat_id, text=msg)
-    return
+    def start_cmd(self, bot, update):
+        user = update.message.from_user.first_name
+        msg = "Hi {}. I'm a generic bot that needs configuration, I think.".format(user)
+        bot.send_message(chat_id=update.message.chat_id, text=msg)
+        return
+
+    def config_cmd(self, bot, update):
+        msg = 'Configuration command not yet implemented.'
+        bot.send_message(chat_id=update.message.chat_id, text=msg)
+        return
+
+    def help_cmd(self, bot, update):
+        msg = 'Help command not yet implemented.'
+        bot.send_message(chat_id=update.message.chat_id, text=msg)
+        return
+
 
 
 if __name__ == '__main__':
