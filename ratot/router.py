@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import pdb
 import sys
 import time
@@ -67,6 +69,7 @@ class RouterBot(AnyBot):
 
     def new_cmd(self, bot, update):
         return
+
 def time_stamp():
     return time.asctime()
 
