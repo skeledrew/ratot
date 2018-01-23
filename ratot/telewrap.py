@@ -1,5 +1,9 @@
+#! /usr/bin/env python3
+
+
 import pdb
 import re
+from time import sleep
 
 import yaml
 from telethon import TelegramClient as TGC
@@ -139,10 +143,75 @@ class TGCWrapper():
         clt_cfg['phone'] = config['sessions'][session]['phone']
         return clt_cfg
 
+class CommandsInterface(TGCWrapper):
+
+    def __init__(self):
+        super().__init__()
+        self._commands = []
+        self.get_commands()
+        self._current_peer = None
+        self._blocking = False
+        self.__dbg = False  # help debug updates
+        return
+
+    def __call__(self, line):
+        cmd = '{}_cmd'.format(line.split()[0])
+        if not hasattr(self, cmd): raise AttributeError('`{}` is not a valid command'.format(cmd))
+        result = getattr(self, cmd)(line)
+        return result
+
+    def get_commands(self):
+        commands = [getattr(self, m) for m in dir(self) if m.endswith('_cmd')]
+        self._commands = commands
+        return commands
+
+    def config_repl(self, options):
+        pass
+
+    def repl(self, options=None):
+        self.config_repl(options)
+
+        while True:
+            in_ = input('_ ')
+            if in_ in ['-exit-', '-quit-']: break
+            if not in_.strip(): continue
+            result = self(in_)
+            self._blocking = True
+
+            while self._blocking:
+                # wait for response
+                sleep(1)
+        return
+
+    def handle_update(self, update):
+        super().handle_update(update)
+        if not hasattr(update, 'message'): return
+        #if not update.message.from_id == self._current_peer.id and update.message.to_id == myself.id: return
+        if not hasattr(update, 'user_id') or not update.user_id == self._current_peer.id: return
+        pfn = self._current_peer.first_name
+        pln = self._current_peer.last_name
+        pun = self._current_peer.username
+        name = '{} {}'.format(pfn, pln or '').strip() if pfn else '@{}'.format(pun) if pun else '???'
+        text = update.message
+        print('{} said: {}'.format(name, text))
+        if self._blocking: self._blocking = False
+        return
+
+    def msg_cmd(self, cmd):
+        peer = self.get_peer(cmd.split()[1])
+        text = ' '.join(cmd.split()[2:])
+        result = super().__call__('send_message', [peer, text])
+        self._current_peer = peer
+        return
+
+    def chat_with(self, cmd):
+        pass
 
 if __name__ == '__main__':
     # testing
-    tgcw = TGCWrapper()
+    #tgcw = TGCWrapper()
+    ci = CommandsInterface()
     config = TGCWrapper.load_config('ratot.yaml')
-    tgcw.start(**config)
-    embed(globals(), locals())
+    ci.start(**config)
+    ci.repl()
+    #embed(globals(), locals())
