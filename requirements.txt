@@ -3,3 +3,4 @@ pexpect
 rpyc
 telethon
 PyYaml
+hangups
