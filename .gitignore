@@ -1,3 +1,5 @@
 skeledrew_test.session
 anybot.py.token
 *.yaml
+*.token
+*.egg-info*
