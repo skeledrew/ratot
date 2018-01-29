@@ -156,7 +156,7 @@ class HC():
                 example.
         """
         args = []
-        logging.basicConfig(level=logging.WARNING)
+        logging.basicConfig(level=logging.INFO)
         # Obtain hangups authentication cookies, prompting for credentials from
         # standard input if necessary.
         cookies = hangups.auth.get_auth_stdin('hangouts.token')
@@ -186,23 +186,23 @@ class HC():
         user_list, conversation_list = (
             await hangups.build_user_conversation_list(client)
         )
-        all_users = user_list.get_all()
-        all_conversations = conversation_list.get_all(include_archived=True)
+        self._all_users = user_list.get_all()
+        self._all_convos = conversation_list.get_all(include_archived=True)
 
-        print('{} known users'.format(len(all_users)))
-        for user in all_users:
-            print('    {}: {}'.format(user.full_name, user.id_.gaia_id))
+        print('{} known users'.format(len(self._all_users)))
+        #for user in all_users:
+        #    print('    {}: {}'.format(user.full_name, user.id_.gaia_id))
 
-        print('{} known conversations'.format(len(all_conversations)))
-        for conversation in all_conversations:
-            if conversation.name:
-                name = conversation.name
-            else:
-                name = 'Unnamed conversation ({})'.format(conversation.id_)
-                print('    {}'.format(name))
+        print('{} known convos'.format(len(self._all_convos)))
+        #for conversation in all_conversations:
+        #    if conversation.name:
+        #        name = conversation.name
+        #    else:
+        #        name = 'Unnamed conversation ({})'.format(conversation.id_)
+        #        print('    {}'.format(name))
         return
 
-    def demo(self):
+    def start(self):
         self.run_coro(self.sync_recent_convos)
         return
 
@@ -212,5 +212,5 @@ if __name__ == '__main__':
     #hc = HangoutsClient()
     #HC.run_it(HC.sync_recent_convos)
     hc = HC()
-    hc.demo()
+    hc.start()
     pdb.set_trace()
