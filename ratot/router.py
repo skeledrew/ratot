@@ -12,14 +12,15 @@ import yaml
 
 sys.path.append(os.path.dirname(__file__))  # put in __init__.py?
 from anybot import AnyBot, Callback
+from config import config
 
 
 class RouterBot(AnyBot):
 
-    def __init__(self, token, config={}):
-        super().__init__(token, config)
-        self._host = 'localhost'
-        self._port = 18881
+    def __init__(self, token):
+        super().__init__(token, {})
+        self._host = config.get('HOST')
+        self._port = int(config.get('PORT'))
         self.commands = ['new']
         self._sessions = {}
         self._async_ops = []
@@ -51,7 +52,7 @@ class RouterBot(AnyBot):
         uname = update.message.from_user.username
         user = '{} {} ({})'.format(update.message.from_user.first_name, update.message.from_user.last_name or '_', uname)
         self.log.info('{} sent `{}`'.format(user, in_))
-        if not uname in ['skeledrew']:
+        if not uname in config.get('ADMINS').split(config.get('SEPARATOR')):
             msg = "You don't have permissions for this."
             bot.send_message(chat_id=update.message.chat_id, text=msg)
             return
@@ -111,7 +112,7 @@ def time_stamp():
 
 if __name__ == '__main__':
     # testing purposes
-    rbot = RouterBot(token=open('anybot.py.token').read().strip())
+    rbot = RouterBot(token=config.get('TOKEN'))
     rbot.start_polling()
     print('RouterBot is running...')
     rbot.idle()

@@ -4,3 +4,4 @@ rpyc
 telethon
 PyYaml
 hangups
+python-dotenv

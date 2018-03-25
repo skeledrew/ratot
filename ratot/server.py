@@ -8,6 +8,10 @@ import sys
 import pexpect  # NB: patch pexpect/__init__.py with `import replwrap`
 import rpyc
 from rpyc import server  # NB: patch rpyc/__init__.py with `from rpyc.utils import server`
+
+from config import config
+
+
 logging.basicConfig(format='%(asctime)s (%(levelname)s): %(message)s', filename='{}.log'.format(sys.argv[0]), level=logging.DEBUG)
 
 
@@ -56,7 +60,7 @@ def clean_ansi(text):
 
 if __name__ == '__main__':
     from rpyc.utils.server import ThreadedServer
-    t = ThreadedServer(ShellSessionsService, port=18881)
+    t = ThreadedServer(ShellSessionsService, port=int(config.get('PORT')))
     print('Running Shell sessions server...')
     t.start()
     print('Server terminated')

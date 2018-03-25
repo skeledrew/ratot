@@ -3,3 +3,5 @@ anybot.py.token
 *.yaml
 *.token
 *.egg-info*
+.env
+.python-version

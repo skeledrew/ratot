@@ -9,6 +9,8 @@ import yaml
 from telethon import TelegramClient as TGC
 from ptpython.repl import embed
 
+from config import config
+
 
 class Callback():
 
@@ -134,13 +136,12 @@ class TGCWrapper():
         return
 
     @staticmethod
-    def load_config(config_file, session=0):
-        config = yaml.load(open(config_file))
+    def load_config():
         clt_cfg = {}
-        clt_cfg['a_id'] = config['client']['api_id']
-        clt_cfg['a_hash'] = config['client']['api_hash']
-        clt_cfg['session'] = config['sessions'][session]['name']
-        clt_cfg['phone'] = config['sessions'][session]['phone']
+        clt_cfg['a_id'] = int(config.get('API_ID'))
+        clt_cfg['a_hash'] = config.get('API_HASH')
+        clt_cfg['session'] = config.get('SESSION_NAME')
+        clt_cfg['phone'] = config.get('PHONE')
         return clt_cfg
 
 class CommandsInterface(TGCWrapper):
@@ -166,9 +167,9 @@ class CommandsInterface(TGCWrapper):
         return commands
 
     def config_repl(self, options):
-        pass
+        self._wait_timeout = options.get('timeout') or 15
 
-    def repl(self, options=None):
+    def repl(self, options={}):
         self.config_repl(options)
 
         while True:
@@ -177,10 +178,13 @@ class CommandsInterface(TGCWrapper):
             if not in_.strip(): continue
             result = self(in_)
             self._blocking = True
+            timeout = self._wait_timeout
 
             while self._blocking:
                 # wait for response
                 sleep(1)
+                timeout -= 1
+                if not timeout: break
         return
 
     def handle_update(self, update):
@@ -209,9 +213,8 @@ class CommandsInterface(TGCWrapper):
 
 if __name__ == '__main__':
     # testing
-    #tgcw = TGCWrapper()
     ci = CommandsInterface()
-    config = TGCWrapper.load_config('ratot.yaml')
+    config = TGCWrapper.load_config()
     ci.start(**config)
     ci.repl()
     #embed(globals(), locals())
