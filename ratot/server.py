@@ -5,7 +5,7 @@ import re
 import logging
 import sys
 
-import pexpect  # NB: patch pexpect/__init__.py with `import replwrap`
+import pexpect  # NB: patch pexpect/__init__.py with `from . import replwrap`
 import rpyc
 from rpyc import server  # NB: patch rpyc/__init__.py with `from rpyc.utils import server`
 
