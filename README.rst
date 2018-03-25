@@ -28,11 +28,11 @@ Remote Access Tool Over Telegram
 Description
 -----------
 
-Have you ever wanted to remotedly access your personal computer or server? Have you ever wanted to do it without setting up port forwarding or otherwise making your accessible to the world? How about without using a solution such as Teamviewer (of which I've been a faithful user for years), which only provides a graphical interface, and so is suseptible to bad connections?
+Have you ever wanted to remotedly access your personal computer or server? Have you ever wanted to do it without setting up port forwarding or otherwise making your computer accessible to the world? How about without using a solution such as Teamviewer (of which I've been a faithful user for years), which only provides a graphical interface, making it very suseptible to bad connections and will also eat mobile data for lunch?
 
-Enter RAToT, a tool to allow access to Bash (and eventually other command line oriented apps) using a Telegram messenger app. Written in Python, it leverages the Telegram bot platform to bridge the gap between a remote machine, and whatever device you have at hand that can run a Telegram client. Just use as if you're chatting with someone.
+Enter RAToT, a tool to allow access to Bash (and eventually other command line oriented apps) using a Telegram messenger app. Written in Python, it leverages the Telegram bot platform to bridge the gap between a remote machine, and whatever device you have at hand that can run a Telegram client, phone, PC, browser-only machine, etc. Just use as if you're chatting with someone.
 
-And now for a totally random and unnecessary statment: This is only possible because Telegram is the best messaging service out there!
+And now for a totally random and unnecessary statement: This is only possible because Telegram is the best messaging service out there!
 
 
 Features
@@ -72,6 +72,8 @@ Installation
 
   * You may also change the HOST and PORT if you wish and know what you're doing.
 
+  * NB: If you get the message `It seems python-dotenv is not installed with cli option.` do ``pip install python-dotenv[cli]``
+
 9) Start the server and router bot on your machine:
 
   a) ``$ cd ratot``
@@ -92,7 +94,7 @@ Installation
 
   d) Add your registered phone numer as PHONE; format `+1234567890`.
 
-  e) Optionally change the default SESSION_NAME.
+  e) Optionally change the efault SESSION_NAME.
 
   f) Run client with ``$ ./telewrap.py`` (ACTUALLY DON'T DO THIS; CURRENTLY INCOMPLETE & BROKEN)
 
