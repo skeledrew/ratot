@@ -10,6 +10,8 @@ from telegram.ext.filters import Filters
 
 
 class Callback():
+    """Associate a callback function with an object"""
+    
     def __init__(self, wrapper, invoke):
         self._wrapper = wrapper
         self._invoke = invoke

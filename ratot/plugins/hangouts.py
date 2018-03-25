@@ -145,9 +145,9 @@ class HC():
             await coro(client, args)
         except asyncio.CancelledError:
             pass
-        finally:
-            await client.disconnect()
-            await task
+        #finally:
+        #    await client.disconnect()
+        #    await task
         return
 
     def run_coro(self, coro, *extra_args):
@@ -189,8 +189,9 @@ class HC():
         user_list, conversation_list = (
             await hangups.build_user_conversation_list(client)
         )
-        self._all_users = user_list.get_all()
+        self._all_users = list(user_list.get_all())
         self._all_convos = conversation_list.get_all(include_archived=True)
+        self._all_convos.on_event.add_observer(self.on_event)
 
         print('{} known users'.format(len(self._all_users)))
         #for user in all_users:
@@ -205,8 +206,38 @@ class HC():
         #        print('    {}'.format(name))
         return
 
-    def start(self):
+    def start_cmd(self):
         self.run_coro(self.sync_recent_convos)
+        return
+
+    def on_event(self, conv_event):
+        if isinstance(conv_event, hangups.ChatMessageEvent):
+            print('received chat message: {!r}'.format(conv_event.text))
+        return
+
+    async def send_message(self, client, args):
+        request = hangups.hangouts_pb2.SendChatMessageRequest(
+            request_header=client.get_request_header(),
+            event_request_header=hangups.hangouts_pb2.EventRequestHeader(
+                conversation_id=hangups.hangouts_pb2.ConversationId(
+                    id=args['conversation_id']
+                ),
+                client_generated_id=client.get_client_generated_id(),
+            ),
+            message_content=hangups.hangouts_pb2.MessageContent(
+                segment=[
+                    hangups.ChatMessageSegment(args['message_text']).serialize()
+                ],
+            ),
+        )
+        await client.send_chat_message(request)
+        return
+
+    def send_cmd(self, text):
+        if not text: return
+        uid = self.get_user(text.split()[0])
+        text = ' '.join(text.split()[1:])
+        self.run_coro(self.send_message, uid, text)
         return
 
 
@@ -215,5 +246,5 @@ if __name__ == '__main__':
     #hc = HangoutsClient()
     #HC.run_it(HC.sync_recent_convos)
     hc = HC()
-    hc.start()
+    hc.start_cmd()
     pdb.set_trace()
