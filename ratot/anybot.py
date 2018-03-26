@@ -1,73 +1,103 @@
+#! /usr/bin/env python3
+
 import pdb
 
 import sys
 import logging
 
-from telegram.ext import Updater, CommandHandler, MessageHandler
+from telegram.ext import Updater, MessageHandler
 from telegram.ext.filters import Filters
 
 
+class Callback():
+    """Associate a callback function with an object"""
+    
+    def __init__(self, wrapper, invoke):
+        self._wrapper = wrapper
+        self._invoke = invoke
+        return
+
+    def __call__(self, *args, **kwargs):
+        if not hasattr(self._wrapper, self._invoke):
+            raise AttributeError('`{}` not found.'.format(self._invoke))
+        return getattr(self._wrapper, self._invoke)(*args, **kwargs)
+
+
 class AnyBot(Updater):
-
-    def __init__(self, token=None, config=None):
-        super().__init__(token or open('{}.token'.format(sys.argv[0])).read().strip())
-        self._handlers = {}
-        #self.load_handlers()  # TODO: figure how to make overridable
-
-    def load_handlers(self, handlers=None):
-
-       if not handlers: handlers = globals()
-       [self.add_handler(self.make_handler(handlers[h]))for h in handlers if h.startswith('handle_')]
-
-    def add_handler(self, handler):
-
-        try:
-            if hasattr(handler, 'command') and handler.command[0] in self._handlers: self.dispatcher.remove_handler(self._handlers[handler.command[0]])
-            if handler.filters and str(handler.filters) in self._handlers: self.dispatcher.remove_handler(self._handlers['mh'])
-
-        except:
-            pass
-        self._handlers[handler.command[0] if hasattr(handler, 'command') else str(handler.filters)] = handler
-        self.dispatcher.add_handler(handler)
+    def __init__(self, token=None, config={}):
+        super().__init__(
+            token or open('{}.token'.format(sys.argv[0])).read().strip()
+        )  # TODO: read from config
+        #self._handlers = {}
+        command_cb = Callback(self, 'handle_command')
+        self.dispatcher.add_handler(
+            MessageHandler(Filters.command, command_cb))
+        text_cb = Callback(self, 'handle_text')
+        self.dispatcher.add_handler(MessageHandler(Filters.text, text_cb))
+        default_log = {
+            'filename': '{}.log'.format(sys.argv[0]),
+            'level': 'DEBUG'
+        }
+        log_cfg = config.get('log', default_log)
+        log_cfg['level'] = log_cfg.get('level', 'INFO').upper()
+        logging.basicConfig(
+            format='%(asctime)s (%(levelname)s): %(message)s', **log_cfg)
+        self.log = logging
         return
 
-    def make_handler(self, callback):
-        pattern = callback()
-        if isinstance(pattern, str) and pattern.startswith('/'):
-            return CommandHandler(pattern[1:], callback)
+    def inject_handler(self, handler, name=''):
+        if not name:
+            name = 'nameless_cmd'  # TODO: get name from handler itself
+        setattr(self, name, handler)
 
-        if isinstance(pattern, str):
-            return MessageHandler(Filters.text, callback)
+    def handle_command(self, bot, update):
+        msg = update.message.text
+        cmd = '{}_cmd'.format(msg.split()[0][1:])
+
+        if not hasattr(self, cmd):
+            self.log.warning(
+                'Invalid command `{}` received and ignored.'.format(cmd))
+            bot.send_message(
+                chat_id=update.message.chat_id,
+                text='`{}` is not a valid command.'.format(cmd))
+            return
+        result = getattr(self, cmd)(bot, update)
+        return result
+
+    def handle_text(self, bot, update):
+        # process regular text
+        msg = update.message.text
+        msg = 'Received: {}'.format(update.message.text)
+        self.log.info('{} from chat_id {}'.format(msg, update.message.chat_id))
+        bot.send_message(chat_id=update.message.chat_id, text=msg)
+        bot.send_message(
+            chat_id=update.message.chat_id,
+            text=
+            'Override the `handle_text` method with your own to properly process text.'
+        )
         return
 
-    def write_log(self, msg):
-        open('{}.log'.format(sys.argv[0]), 'a').write(msg + '\n')
+    def handle_file(self, bot, update):
+        pass
 
-def handle_start(bot=None, update=None):
-    if not update: return '/start'
-    user = update.message.from_user.first_name
-    msg = "Hi {}. I'm a generic bot that needs configuration, I think.".format(user)
-    bot.send_message(chat_id=update.message.chat_id, text=msg)
-    return
+    def start_cmd(self, bot, update):
+        user = update.message.from_user.first_name
+        self.log.info('{} ({}) started the bot.'.format(
+            user, update.message.from_user.username))
+        msg = "Hi {}. I'm a generic bot that needs configuration, I think.".format(
+            user)
+        bot.send_message(chat_id=update.message.chat_id, text=msg)
+        return
 
-def handle_config(bot=None, update=None):
-    if not update: return '/config'
-    msg = 'Configuration command not yet implemented.'
-    bot.send_message(chat_id=update.message.chat_id, text=msg)
-    return
+    def config_cmd(self, bot, update):
+        msg = 'Configuration command not yet implemented.'
+        bot.send_message(chat_id=update.message.chat_id, text=msg)
+        return
 
-def handle_help(bot=None, update=None):
-    if not update: return '/help'
-    msg = 'Help command not yet implemented.'
-    bot.send_message(chat_id=update.message.chat_id, text=msg)
-    return
-
-def handle_text(bot=None, update=None):
-    # process regular text
-    if not update: return '.+'
-    msg = 'Received: {}'.format(update.message.text)
-    bot.send_message(chat_id=update.message.chat_id, text=msg)
-    return
+    def help_cmd(self, bot, update):
+        msg = 'Help command not yet implemented.'
+        bot.send_message(chat_id=update.message.chat_id, text=msg)
+        return
 
 
 if __name__ == '__main__':
