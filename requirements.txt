@@ -1,6 +1,6 @@
-python-telegram-bot
-pexpect
-rpyc
+rpyc==3.4.4
+pexpect==4.4.0
+python-telegram-bot==10.0.1
 telethon
 PyYaml
 hangups
