@@ -3,5 +3,5 @@ pexpect==4.4.0
 python-telegram-bot==10.0.1
 telethon
 PyYaml
-hangups
+hangups==0.4.4
 python-dotenv
