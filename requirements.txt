@@ -4,4 +4,4 @@ python-telegram-bot==10.0.1
 telethon
 PyYaml
 hangups
-python-dotenv
+python-dotenv==0.8.2
