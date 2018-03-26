@@ -2,6 +2,6 @@ rpyc==3.4.4
 pexpect==4.4.0
 python-telegram-bot==10.0.1
 telethon
-PyYaml
+PyYaml==3.12
 hangups
 python-dotenv
