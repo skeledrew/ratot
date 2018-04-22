@@ -56,9 +56,11 @@ Installation
 
 5) Patch the following files in your Python's site-packages folder:
 
-  a) In **pexpect/__init__.py** add ``from . import replwrap``
+  * In **pexpect/__init__.py** add ``from . import replwrap``
 
-  b) In **rpyc/__init__.py** add ``from rpyc.utils import server``
+  * In **rpyc/__init__.py** add ``from rpyc.utils import server``
+
+  * NB: You can use ``$ python3 -c 'import rpyc; print(rpyc.__path__)'``, etc to get the path
 
 6) Copy the **.env.template** file to **.env**
 
@@ -101,6 +103,14 @@ Installation
   g) Wait for fix or contribute one [see f].
 
 
+Known Bugs/Issues/Quirks
+------------------------
+
+* Interactive programs don't work
+
+* There is a limit on the amount of text that can transferred
+
+
 TODO
 ----
 
@@ -117,6 +127,10 @@ TODO
 * Work on docs
 
 * Support more shells and interpreters (Python, xonsh, etc)
+
+* Support interactive programs (less, man, screen, sudo, etc)
+
+* Implement command aliasing
 
 
 Credits
