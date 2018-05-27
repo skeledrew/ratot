@@ -1,0 +1,8 @@
+#! /usr/bin/env bash
+
+# setting up sudoers proxy:
+# 1. run `sudo visudo`
+# 2. add "ALL ALL = (root) NOPASSWD: /absolute/path/to/su_it"
+# 3. save as "/etc/sudoers"
+
+echo `$@`

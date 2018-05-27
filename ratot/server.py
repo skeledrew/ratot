@@ -26,7 +26,7 @@ class ShellSessionsService(rpyc.Service):
 
     def exposed_repl(self, in_):
         try:
-            out_ = clean_ansi(self._bash.run_command(in_))
+            out_ = clean_ansi(self._bash.run_command(self.handle_sudo(in_)))
             return out_
 
         except Exception as e:
@@ -38,7 +38,7 @@ class ShellSessionsService(rpyc.Service):
         logging.debug('Inside async repl')
 
         try:
-            out_ = clean_ansi(self._bash.run_command(in_))
+            out_ = clean_ansi(self._bash.run_command(self.handle_sudo(in_)))
             logging.debug('Command complete!')
 
         except Exception as e:
@@ -49,6 +49,12 @@ class ShellSessionsService(rpyc.Service):
         logging.debug('Running callback {} in async with results:\n{}'.format(str(cb), out_))
         cb(chat_id=kwargs['chat_id'], text=out_)
         return out_
+
+    def handle_sudo(self, command):
+        if command.startswith('sudo '):
+            # use sudoers proxy file
+            return command.replace('sudo', 'sudo ./su_it', 1)
+        return command
 
 
 def clean_ansi(text):
