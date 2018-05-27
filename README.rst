@@ -98,8 +98,9 @@ Installation
 
   f) Run client with ``$ ./telewrap.py`` (ACTUALLY DON'T DO THIS; CURRENTLY INCOMPLETE & BROKEN)
 
-  g) Wait for fix or contribute one [see f].
+  g) Wait for fix or contribute one [see above].
 
+12) Allow sudo access by following the instructions in **su_it**.
 
 TODO
 ----
