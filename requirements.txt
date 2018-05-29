@@ -1,5 +1,5 @@
 rpyc==3.4.4
-pexpect==4.4.0
+pexpect==4.6.0
 python-telegram-bot==10.0.1
 telethon==0.18.1.1
 hangups==0.4.4
