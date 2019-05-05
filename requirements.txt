@@ -1,10 +1,10 @@
 rpyc==3.4.4
 pexpect==4.4.0
 python-telegram-bot==10.0.1
-telethon==0.18.1.1
+telethon==1.7.6
 hangups==0.4.4
 PyYaml==3.12
 python-dotenv==0.8.2
 hangups==0.4.4
 PyYaml==3.12
-telethon==0.18.1.1
+telethon==1.7.6
