@@ -1,4 +1,4 @@
-rpyc==3.4.4
+rpyc==4.1.0
 pexpect==4.4.0
 python-telegram-bot==10.0.1
 telethon==0.18.1.1
