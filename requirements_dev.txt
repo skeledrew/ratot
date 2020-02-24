@@ -10,4 +10,4 @@ coverage==4.5.1
 Sphinx==1.7.2
 cryptography==2.2.1
 PyYAML==3.12
-ptpython==0.41
+ptpython==3.0.1
